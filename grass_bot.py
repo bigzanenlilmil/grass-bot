@@ -1,8 +1,36 @@
 # grass_bot.py
 
-import requests, json, time, schedule, traceback, os, random
+import os
+import json
+import time
+import base64
+import requests
+import schedule
+import traceback
+import random
 from datetime import datetime
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# ==========================
+# RESTORE ENCRYPTED FILES FROM ENV
+# ==========================
+def restore_file_from_env(var_name, filename):
+    b64_data = os.environ.get(var_name)
+    if b64_data:
+        try:
+            decoded = base64.b64decode(b64_data)
+            with open(filename, "wb") as f:
+                f.write(decoded)
+            print(f"✅ Restored: {filename}")
+        except Exception as e:
+            print(f"❌ Error decoding {var_name}: {e}")
+    else:
+        print(f"⚠️ Environment variable {var_name} not found.")
+
+# Restore encrypted files at runtime (Railway safe)
+restore_file_from_env("AES_KEY_B64", "aes_key.bin")
+restore_file_from_env("ACCOUNT1_B64", "account1.enc")
+restore_file_from_env("ACCOUNT2_B64", "account2.enc")
 
 # ==========================
 # CONFIGURATION
@@ -13,8 +41,8 @@ API_BASE_URL = "https://api.getgrass.io"
 PRIMARY_PROXY = {"address": "216.229.112.25", "port": 8080}
 BACKUP_PROXY = {"address": "43.153.69.25", "port": 13001}
 
-TELEGRAM_BOT_TOKEN = "7903523419:AAG_bEVncAoj7bXntpF_J-k6FU64vS19e5M"
-TELEGRAM_CHAT_ID = "7365761667"
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # ==========================
 # DECRYPT ENCRYPTED ACCOUNT
